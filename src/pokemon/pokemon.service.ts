@@ -18,12 +18,7 @@ export class PokemonService {
       const pokemonCreated = await this.pokemonModel.create(createPokemonDto);
       return pokemonCreated;
     } catch (error) {
-      if (error.code === 11000) {
-        throw new BadRequestException(`El nombre '${error.keyValue.name}' ya existe en la Base de Datos`);
-      }
-
-      console.log(error);
-      throw new InternalServerErrorException("Error al crear el pokemon - Revisa los logs");
+      this.handleException(error);
     }
   }
 
@@ -63,13 +58,42 @@ export class PokemonService {
     if (updatePokemonDto.name) {
       updatePokemonDto.name = updatePokemonDto.name.toLowerCase();
     }
+    try {
+      await pokemon.updateOne(updatePokemonDto, { new: true });
 
-    await pokemon.updateOne(updatePokemonDto, { new: true });
-
-    return pokemon;
+      return { ...pokemon.toJSON(), ...updatePokemonDto };
+    } catch (error) {
+      this.handleException(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pokemon`;
+  async remove(id: string) {
+    // Esta sería una forma de hacerlo, pero al tener un custom pipe que valide el id de mongo, no es necesario
+    // const pokemon = await this.findOne(id);
+    // await this.pokemonModel.deleteOne({ _id: pokemon._id });
+
+    // Otra forma de hacerlo
+    //  await this.pokemonModel.findByIdAndDelete(id);
+
+    const { deletedCount } = await this.pokemonModel.deleteOne({ _id: id });
+
+    if (deletedCount === 0) {
+      throw new BadRequestException(`El pokemon con id '${id}' no existe`);
+    }
+
+    return;
+  }
+
+  private handleException(error: any) {
+    if (error.code === 11000) {
+      if (error.keyValue.name) {
+        throw new InternalServerErrorException(`El nombre '${error.keyValue.name}' ya existe en la Base de Datos`);
+      }
+
+      if (error.keyValue.nro) {
+        throw new InternalServerErrorException(`El número '${error.keyValue.nro}' ya existe en la Base de Datos`);
+      }
+    }
+    throw new InternalServerErrorException("Error al crear el pokemon - Revisa los logs");
   }
 }
