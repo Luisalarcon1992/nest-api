@@ -26,6 +26,12 @@ npm i -g @nest/cli
 docker-componse up -d
 ```
 
+5. Construir una base de datos de prueba
+
+```
+http://localhost:3000/api/v1/seed
+```
+
 ## Stack Utilizado para el proyecto
 
 - Mongo DB
