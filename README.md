@@ -26,7 +26,13 @@ npm i -g @nest/cli
 docker-componse up -d
 ```
 
-5. Construir una base de datos de prueba
+5. Clonar el archivo **.env.template** y modificar el nombre a **.env**
+
+6. Cargar las variables de entorno en el nuevo archivo **.env**
+
+7. Iniciar el proyecto con el comando **npm run start:dev**
+
+8. Construir una base de datos de prueba
 
 ```
 http://localhost:3000/api/v1/seed
